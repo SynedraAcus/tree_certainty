@@ -24,6 +24,28 @@ def distance_vector(tree):
     return distances
 
 
+def produce_vectors(trees):
+    """
+    Produce vectors for all trees in the iterable.
+
+    This function modifies trees in the process, so use a copy of the tree set
+    if you expect to need it later.
+    :param trees:
+    :return:
+    """
+    orig_labels = trees[0].taxon_namespace.labels()
+    count = 0
+    vectors = []
+    for tree in trees:
+        count += 1
+        labels = tree.taxon_namespace.labels()
+        tree.is_rooted = True
+        if labels != orig_labels:
+            raise ValueError(f'Label set in tree #{count} is different from previous trees')
+        vectors.append(distance_vector(tree))
+    return vectors
+
+
 def shared_pairs(vector1: list[int], vector2: list[int],
                  normalize: bool = False):
     """
@@ -104,11 +126,16 @@ def tree_distance_matrix(trees, **kwargs):
     vectors = [distance_vector(x) for x in trees]
     return vector_distance_matrix(vectors, **kwargs)
 
+
 def stable_pairs(vectors):
     """
-    Take an iterable of distance vectors, return the set of taxa pairs that have the
-    same patristic distance in all matrices
-    :param matrices:
+    Take an iterable of distance vectors, return the set of taxa pairs that
+    have the same patristic distance in all vectors.
+    This function does not calculate a complete distance matrix and is
+    intended to identify the stable taxa pairs relatively quickly in a large
+    set of vectors. If you need pairwise comparisons, use dedicated methods
+    (`tree_distance_matrix` or `vector_distance_matrix`) instead.
+    :param vectors:
     :return:
     """
     is_stable = None
