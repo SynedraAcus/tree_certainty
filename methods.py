@@ -20,13 +20,60 @@ def distance_vector(tree):
         for other_taxon in labels[taxon_index + 1:]:
             distances.append(matrix.path_edge_count(tree.taxon_namespace.get_taxon(taxon),
                                                     tree.taxon_namespace.get_taxon(other_taxon)) - 1)
-            print(taxon, other_taxon, distances[-1])
     return distances
+
+
+def shared_pairs(vector1: list[int], vector2: list[int],
+                 normalize: bool = False):
+    """
+    Take two distance vectors, return the count of taxa pairs that have the same
+    patristic distances in both.
+    :param vector1: distance vector
+    :param vector2: distance vector
+    :param normalize: Whether the count should be normalized (divided by vector length)
+    . Defaults to False, ie returning raw counts
+    :return:
+    """
+    if len(vector1) != len(vector2):
+        raise ValueError('Vector lengths do not match')
+    count = sum(map(lambda x: 1 if x[0] == x[1] else 0, zip(vector1, vector2)))
+    if normalize:
+        return count / len(vector1)
+    return count
+
+
+def tree_distance_matrix(trees: list[Tree], **kwargs):
+    """
+    For an list of trees, return a distance matrix
+    :param trees:
+    :return:
+    """
+    # Does not check tree validity, expects it to be checked by caller
+    # Or raised by shared_pairs
+    vectors = [distance_vector(x) for x in trees]
+    return vector_distance_matrix(vectors, **kwargs)
+
+
+def vector_distance_matrix(vectors: list[list[int]], **kwargs):
+    """
+    Build a distance matrix for a list of distance vectors
+    :param vectors:
+    :param kwargs:
+    :return:
+    """
+    matrix = [[0 for _ in vectors] for _1 in vectors]
+    for index, vector in enumerate(vectors):
+        matrix[index][index] = 0
+        for other_index, other_vector in enumerate(vectors[index + 1:]):
+            dist = shared_pairs(vector, other_vector, **kwargs)
+            matrix[index][index + other_index + 1] = dist
+            matrix[index + other_index + 1][index] = dist
+    return matrix
 
 
 def stable_pairs(vectors):
     """
-    Take an iterable of matrices, return the set of taxa pairs that have the
+    Take an iterable of distance vectors, return the set of taxa pairs that have the
     same patristic distance in all matrices
     :param matrices:
     :return:

@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 from dendropy import Tree, TreeList
-from methods import distance_vector, stable_pairs
+from methods import *
 
 if __name__ == '__main__':
     parser = ArgumentParser('Analysis of consistency in a phylogenetic tree set')
@@ -27,5 +27,4 @@ if __name__ == '__main__':
             raise ValueError(f'Label set in tree #{count} is different from previous trees')
         vectors.append(distance_vector(tree))
     res = stable_pairs(vectors)
-    print(res.count(True))
 
