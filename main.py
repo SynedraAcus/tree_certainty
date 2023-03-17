@@ -1,6 +1,9 @@
+import matplotlib.pyplot as plt
+
 from argparse import ArgumentParser
 from dendropy import Tree, TreeList
 from methods import *
+from sklearn.manifold import MDS
 
 if __name__ == '__main__':
     parser = ArgumentParser('Analysis of consistency in a phylogenetic tree set')
@@ -26,5 +29,14 @@ if __name__ == '__main__':
         if labels != orig_labels:
             raise ValueError(f'Label set in tree #{count} is different from previous trees')
         vectors.append(distance_vector(tree))
-    res = stable_pairs(vectors)
-
+    shared = stable_pair_count(vectors)
+    shared_norm = shared / len(vectors[0])
+    matrix = vector_distance_matrix(vectors, normalize=True)
+    # Produce an image
+    # TODO: multiple tree files, multiple images
+    mds = MDS(n_components=2, dissimilarity='precomputed')
+    transformed = mds.fit_transform(vector_distance_matrix(vectors, normalize=False))
+    plt.scatter(transformed[:, 0], transformed[:, 1])
+    set_name = '.'.join(args.t.split('.')[:-1])
+    plt.title(f'File {set_name}, {shared} ({shared_norm*100:.2f} %) shared distances')
+    plt.savefig(f'{set_name}.png')

@@ -2,6 +2,7 @@
 Methods for measuring the diversity of a set of phylogenetic trees
 """
 from dendropy import Tree
+from copy import deepcopy
 
 
 def distance_vector(tree):
@@ -38,25 +39,26 @@ def shared_pairs(vector1: list[int], vector2: list[int],
         raise ValueError('Vector lengths do not match')
     count = sum(map(lambda x: 1 if x[0] == x[1] else 0, zip(vector1, vector2)))
     if normalize:
+        # TODO: maybe other normalization procedures besides simple division
         return count / len(vector1)
     return count
 
 
-def tree_distance_matrix(trees: list[Tree], **kwargs):
+def tree_similarity_matrix(trees: list[Tree], **kwargs):
     """
-    For an list of trees, return a distance matrix
+    For an list of trees, return a similarity matrix
     :param trees:
     :return:
     """
     # Does not check tree validity, expects it to be checked by caller
     # Or raised by shared_pairs
     vectors = [distance_vector(x) for x in trees]
-    return vector_distance_matrix(vectors, **kwargs)
+    return vector_similarity_matrix(vectors, **kwargs)
 
 
-def vector_distance_matrix(vectors: list[list[int]], **kwargs):
+def vector_similarity_matrix(vectors: list[list[int]], **kwargs):
     """
-    Build a distance matrix for a list of distance vectors
+    Build a similarity matrix for a list of distance vectors
     :param vectors:
     :param kwargs:
     :return:
@@ -64,12 +66,43 @@ def vector_distance_matrix(vectors: list[list[int]], **kwargs):
     matrix = [[0 for _ in vectors] for _1 in vectors]
     for index, vector in enumerate(vectors):
         matrix[index][index] = 0
-        for other_index, other_vector in enumerate(vectors[index + 1:]):
+        for other_index, other_vector in enumerate(vectors[index:]):
             dist = shared_pairs(vector, other_vector, **kwargs)
-            matrix[index][index + other_index + 1] = dist
-            matrix[index + other_index + 1][index] = dist
+            # Does an unnecessary assignment when other_index = 0, but who cares
+            matrix[index][index + other_index] = dist
+            matrix[index + other_index][index] = dist
     return matrix
 
+
+def vector_distance_matrix(vectors, normalize=False):
+    """
+    Build a distance matrix for a list of distance vectors
+    :param vectors:
+    :param normalize:
+    :return:
+    """
+    matrix = vector_similarity_matrix(vectors, normalize = normalize)
+    r = []
+    if normalize:
+        # If normalized, distance = 1 - similarity
+        for row in matrix:
+            r.append([1 - x for x in row])
+    else:
+        for row in matrix:
+            max_value = len(vectors[0])
+            r.append([max_value - x for x in row])
+    return r
+
+
+def tree_distance_matrix(trees, **kwargs):
+    """
+    Build a distance matrix for a list of trees
+    :param trees:
+    :param kwargs:
+    :return:
+    """
+    vectors = [distance_vector(x) for x in trees]
+    return vector_distance_matrix(vectors, **kwargs)
 
 def stable_pairs(vectors):
     """
@@ -91,3 +124,18 @@ def stable_pairs(vectors):
             if is_stable[index] and vector[index] != orig_vector[index]:
                 is_stable[index] = False
     return is_stable
+
+
+def stable_pair_count(vectors, normalize=False):
+    """
+    A number of stable pairs, either normalized or not
+    :param vectors:
+    :param normalize:
+    :return:
+    """
+    is_stable = stable_pairs(vectors)
+    count = is_stable.count(True)
+    if normalize:
+        return count / len(vectors[0])
+    else:
+        return count
