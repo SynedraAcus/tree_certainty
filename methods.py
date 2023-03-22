@@ -2,7 +2,7 @@
 Methods for measuring the diversity of a set of phylogenetic trees
 """
 from dendropy import Tree
-from copy import deepcopy
+from matrix_fix import CorrectMatrix
 
 
 def distance_vector(tree):
@@ -13,7 +13,7 @@ def distance_vector(tree):
     """
     if not isinstance(tree, Tree):
         raise TypeError(f'{type(tree)} used instead of dendropy.Tree in distance_vector')
-    matrix = tree.phylogenetic_distance_matrix()
+    matrix = CorrectMatrix.from_tree(tree)
     # Convert distance matrix into label-sorted vector
     labels = sorted(tree.taxon_namespace.labels())
     distances = []
@@ -39,7 +39,6 @@ def produce_vectors(trees):
     for tree in trees:
         count += 1
         labels = tree.taxon_namespace.labels()
-        tree.is_rooted = True
         if labels != orig_labels:
             raise ValueError(f'Label set in tree #{count} is different from previous trees')
         vectors.append(distance_vector(tree))

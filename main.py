@@ -19,17 +19,22 @@ if __name__ == '__main__':
     parser.add_argument('--nonmetric', action='store_true',
                         help='Use nonmetric MDS instead of metric.')
     args = parser.parse_args()
-    # TODO: work with unrooted trees correctly
-    # Dendropy implementation counts the root anyway, so the distance between
-    # leaves on different halves of the tree is overestimated.
-    if args.unrooted:
-        raise NotImplementedError('Unrooted tree analysis is not ready yet')
     normalized_shareds = []
     for treefile in args.t:
         print(f'Processing {treefile}...', end='', file=sys.stderr)
         # TODO: change to iterable in case there are too many trees to fit in memory
         try:
             trees = TreeList.get(file=open(treefile), schema='newick')
+            if args.unrooted:
+                for tree in trees:
+                    tree.is_rooted = False
+            else:
+                # Both values are set explicitly because dendropy reader
+                # sets the rootedness in a convoluted way depending on
+                # the file, and we want to choose between rooted and unrooted
+                # treatment for the entire dataset
+                for tree in trees:
+                    tree.is_rooted = True
         except NewickReader.NewickReaderDuplicateTaxonError:
             print(' Duplicate taxa names, skipping this file', file=sys.stderr)
             continue
