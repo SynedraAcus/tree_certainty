@@ -45,8 +45,7 @@ def produce_vectors(trees):
     return vectors
 
 
-def shared_pairs(vector1: list[int], vector2: list[int],
-                 normalize: bool = False):
+def shared_pairs(vector1, vector2, normalize = False):
     """
     Take two distance vectors, return the count of taxa pairs that have the same
     patristic distances in both.
@@ -65,7 +64,7 @@ def shared_pairs(vector1: list[int], vector2: list[int],
     return count
 
 
-def tree_similarity_matrix(trees: list[Tree], **kwargs):
+def tree_similarity_matrix(trees, **kwargs):
     """
     For an list of trees, return a similarity matrix
     :param trees:
@@ -77,7 +76,7 @@ def tree_similarity_matrix(trees: list[Tree], **kwargs):
     return vector_similarity_matrix(vectors, **kwargs)
 
 
-def vector_similarity_matrix(vectors: list[list[int]], **kwargs):
+def vector_similarity_matrix(vectors, **kwargs):
     """
     Build a similarity matrix for a list of distance vectors
     :param vectors:
