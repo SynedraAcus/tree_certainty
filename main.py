@@ -60,8 +60,9 @@ if __name__ == '__main__':
         plt.figure()
         plt.scatter(transformed[:, 0], transformed[:, 1])
         set_name = '.'.join(treefile.split('.')[:-1])
-        plt.title(f'Dataset {set_name}, {shared} ({shared_norm*100:.2f} %) shared distances')
+        plt.title(f'Dataset {set_name}, {len(vectors)} trees, {shared} ({shared_norm*100:.2f} %) shared distances')
         plt.savefig(f'{set_name}.png')
+        plt.close()
     # Drawing a histogram
     plt.figure()
     plt.hist(normalized_shareds)
