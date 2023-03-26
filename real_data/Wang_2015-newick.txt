@@ -1,0 +1,2 @@
+(((L.sativus:0.7247,L.cicera:0.7247):0.3798,(L.tingitanus:1.0260,(L.aphaca:0.7182,L.hirsutus:0.7182):0.3078):0.0785):0.1012,(((L.clymenum:0.8923,L.ochrus:0.8923):0.1536,(L.sylvestris:0.6698,L.latifolius:0.6698):0.3761):0.0327,L.pratensis:1.0786):0.1271):0.0000;
+(((L.sativus:0.7247,L.cicera:0.7247):0.3798,(L.tingitanus:1.0260,(L.aphaca:0.7182,L.hirsutus:0.7182):0.3078):0.0785):0.1012,((L.clymenum:0.8923,L.ochrus:0.8923):0.1754,(L.pratensis:1.0459,(L.sylvestris:0.6698,L.latifolius:0.6698):0.3761):0.0218):0.1380):0.0000;
